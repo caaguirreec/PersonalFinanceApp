@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app:delegated
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:5000
+    command: npm run dev
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app:delegated
+      - db-data:/data
+    environment:
+      - FLASK_ENV=development
+      - DATABASE_PATH=/data/transactions.db
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: ./database
+      dockerfile: Dockerfile
+    volumes:
+      - db-data:/data
+
+volumes:
+  db-data:
+    driver: local 
